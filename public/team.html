@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Team | JoyStick International</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { brand: { bg:'var(--color-bg)', surface:'var(--color-surface)', border:'var(--color-border)', primary:'var(--color-primary)', secondary:'var(--color-secondary)', tertiary:'var(--color-tertiary)', text:'var(--color-text)', muted:'var(--color-muted)' } },
+                    fontFamily: { heading:['var(--font-heading)','cursive'], body:['var(--font-body)','monospace'] },
+                    boxShadow: { pixel:'var(--shadow-pixel)', 'pixel-hover':'var(--shadow-pixel-hover)', 'pixel-sm':'var(--shadow-pixel-sm)' },
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --color-bg:#0D0D1A; --color-surface:#13132B; --color-border:#1E1E3F;
+            --color-primary:#f6af0b; --color-secondary:#ffffff; --color-tertiary:#ffa200;
+            --color-text:#E0E0FF; --color-muted:#B0B0D0;
+            --font-heading:'Press Start 2P',cursive; --font-body:'VT323',monospace;
+            --shadow-pixel:6px 6px 0px 0px #000000; --shadow-pixel-hover:8px 8px 0px 0px var(--color-secondary); --shadow-pixel-sm:3px 3px 0px 0px #000000;
+        }
+        body { background-color:var(--color-bg); color:var(--color-text); overflow-x:hidden; image-rendering:pixelated; }
+        .scanlines { position:fixed; top:0; left:0; width:100%; height:100%; background:linear-gradient(to bottom,rgba(255,255,255,0),rgba(255,255,255,0) 50%,rgba(0,0,0,0.1) 50%,rgba(0,0,0,0.1)); background-size:100% 4px; pointer-events:none; z-index:9999; opacity:0.15; }
+        .crt-flicker { animation:flicker 0.15s infinite; pointer-events:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(18,16,16,0.02); z-index:9998; }
+        @keyframes flicker { 0%{opacity:0.9} 50%{opacity:1.0} 100%{opacity:0.9} }
+        .cursor-blink { animation:blink 1s step-end infinite; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+        ::-webkit-scrollbar { width:12px; background:var(--color-bg); }
+        ::-webkit-scrollbar-thumb { background:var(--color-border); border:2px solid var(--color-bg); }
+        ::-webkit-scrollbar-thumb:hover { background:var(--color-primary); }
+        ::selection { background:var(--color-secondary); color:#fff; }
+        .btn-pixel { transition:all 0.1s steps(2); }
+        .btn-pixel:active { transform:translate(2px,2px); box-shadow:2px 2px 0px 0px #000 !important; }
+
+        /* Card flip effect */
+        .card-flip { perspective: 800px; }
+        .card-inner { transition: transform 0.5s; transform-style: preserve-3d; position: relative; }
+        .card-flip:hover .card-inner { transform: rotateY(180deg); }
+        .card-front, .card-back { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+        .card-back { transform: rotateY(180deg); }
+
+        /* Scanline on avatar */
+        .avatar-wrap::after {
+            content:'';
+            position:absolute; inset:0;
+            background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.15) 2px,rgba(0,0,0,0.15) 4px);
+            pointer-events:none;
+        }
+
+        @keyframes float {
+            0%,100% { transform:translateY(0); }
+            50%      { transform:translateY(-8px); }
+        }
+        .float { animation: float 3s ease-in-out infinite; }
+
+        .dept-badge {
+            font-family: var(--font-heading);
+            font-size: 10px;
+            padding: 2px 8px;
+            border: 1px solid;
+        }
+        .dept-ART    { color:#f6af0b; border-color:#f6af0b; }
+        .dept-CODE   { color:#00ffcc; border-color:#00ffcc; }
+        .dept-AUDIO  { color:#ff6bff; border-color:#ff6bff; }
+        .dept-DESIGN { color:#ffa200; border-color:#ffa200; }
+        .dept-OPS    { color:#7ec8ff; border-color:#7ec8ff; }
+    </style>
+</head>
+<body class="font-body relative min-h-screen flex flex-col">
+    <div class="scanlines"></div>
+    <div class="crt-flicker"></div>
+
+    <!-- Nav -->
+    <nav class="sticky top-0 z-50 bg-brand-bg border-b-4 border-brand-primary w-full">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <a href="/" class="font-heading text-xl md:text-2xl text-white tracking-tighter">
+                    <span class="text-brand-primary">JOY</span>STICK<span class="cursor-blink ml-1 text-brand-secondary">▮</span>
+                </a>
+                <div class="hidden md:flex items-baseline space-x-8">
+                    <a href="/#games"   class="font-heading text-xs text-brand-muted hover:text-brand-secondary transition-colors group"><span class="opacity-0 group-hover:opacity-100 mr-1 text-brand-secondary">►</span>GAMES</a>
+                    <a href="/#about"   class="font-heading text-xs text-brand-muted hover:text-brand-secondary transition-colors group"><span class="opacity-0 group-hover:opacity-100 mr-1 text-brand-secondary">►</span>ABOUT</a>
+                    <a href="/team"     class="font-heading text-xs text-brand-primary border-b-2 border-brand-primary pb-0.5">► TEAM</a>
+                    <a href="/#careers" class="font-heading text-xs text-brand-muted hover:text-brand-secondary transition-colors group"><span class="opacity-0 group-hover:opacity-100 mr-1 text-brand-secondary">►</span>CAREERS</a>
+                    <a href="/#contact" class="font-heading text-xs text-brand-muted hover:text-brand-secondary transition-colors group"><span class="opacity-0 group-hover:opacity-100 mr-1 text-brand-secondary">►</span>CONTACT</a>
+                </div>
+                <div class="md:hidden">
+                    <button onclick="document.getElementById('mob').classList.toggle('hidden')" class="text-brand-primary p-2 font-heading text-xs border-2 border-brand-border bg-brand-surface">MENU</button>
+                </div>
+            </div>
+            <div id="mob" class="hidden md:hidden pb-4 flex flex-col space-y-3">
+                <a href="/" class="font-heading text-xs text-brand-muted px-2 py-1">► HOME</a>
+                <a href="/team" class="font-heading text-xs text-brand-primary px-2 py-1">► TEAM</a>
+                <a href="/#careers" class="font-heading text-xs text-brand-muted px-2 py-1">► CAREERS</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="relative py-24 overflow-hidden bg-brand-bg">
+        <div class="absolute inset-0 opacity-10" style="background-image:url('data:image/svg+xml,%3Csvg width=\"40\" height=\"40\" viewBox=\"0 0 40 40\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"%231E1E3F\" fill-opacity=\"0.8\" fill-rule=\"evenodd\"%3E%3Cpath d=\"M0 40L40 0H20L0 20M40 40V20L20 40\"/%3E%3C/g%3E%3C/svg%3E');"></div>
+        <!-- Floating pixel characters -->
+        <div class="absolute left-10 top-16 float opacity-30 hidden lg:block" style="animation-delay:0s"><div class="w-12 h-12 bg-brand-primary border-2 border-black flex items-center justify-center font-heading text-xl text-black">👾</div></div>
+        <div class="absolute right-20 top-24 float opacity-30 hidden lg:block" style="animation-delay:1s"><div class="w-10 h-10 bg-brand-tertiary border-2 border-black flex items-center justify-center font-heading text-lg text-black">🎮</div></div>
+        <div class="absolute left-1/4 bottom-8 float opacity-20 hidden lg:block" style="animation-delay:2s"><div class="w-8 h-8 bg-brand-surface border-2 border-brand-primary flex items-center justify-center font-heading text-sm text-brand-primary">♦</div></div>
+
+        <div class="relative z-10 text-center max-w-4xl mx-auto px-4">
+            <div class="inline-block mb-4 px-4 py-1 border border-brand-border bg-brand-surface">
+                <span class="font-heading text-[10px] text-brand-muted">PARTY_MEMBERS.EXE</span>
+            </div>
+            <h1 class="font-heading text-3xl md:text-5xl text-white mb-6 leading-tight">
+                MEET THE <span class="text-brand-primary">GUILD</span><span class="cursor-blink text-brand-secondary">_</span>
+            </h1>
+            <p class="font-body text-xl md:text-2xl text-brand-muted max-w-2xl mx-auto">
+                The pixel wizards, code sorcerers, and audio alchemists behind every world we build.
+            </p>
+        </div>
+    </section>
+
+    <!-- Filter Bar -->
+    <section class="bg-brand-surface border-y-2 border-brand-border py-4 sticky top-20 z-40">
+        <div class="max-w-7xl mx-auto px-4 flex flex-wrap gap-3 justify-center">
+            <button onclick="filterTeam('ALL')"    class="filter-btn active-filter font-heading text-xs px-4 py-2 border-2 border-brand-primary text-brand-primary bg-brand-bg hover:bg-brand-primary hover:text-black transition-colors" data-dept="ALL">ALL</button>
+            <button onclick="filterTeam('ART')"    class="filter-btn font-heading text-xs px-4 py-2 border-2 border-brand-border text-brand-muted bg-brand-bg hover:border-brand-primary hover:text-brand-primary transition-colors" data-dept="ART">ART</button>
+            <button onclick="filterTeam('CODE')"   class="filter-btn font-heading text-xs px-4 py-2 border-2 border-brand-border text-brand-muted bg-brand-bg hover:border-brand-primary hover:text-brand-primary transition-colors" data-dept="CODE">CODE</button>
+            <button onclick="filterTeam('AUDIO')"  class="filter-btn font-heading text-xs px-4 py-2 border-2 border-brand-border text-brand-muted bg-brand-bg hover:border-brand-primary hover:text-brand-primary transition-colors" data-dept="AUDIO">AUDIO</button>
+            <button onclick="filterTeam('DESIGN')" class="filter-btn font-heading text-xs px-4 py-2 border-2 border-brand-border text-brand-muted bg-brand-bg hover:border-brand-primary hover:text-brand-primary transition-colors" data-dept="DESIGN">DESIGN</button>
+            <button onclick="filterTeam('OPS')"    class="filter-btn font-heading text-xs px-4 py-2 border-2 border-brand-border text-brand-muted bg-brand-bg hover:border-brand-primary hover:text-brand-primary transition-colors" data-dept="OPS">OPS</button>
+        </div>
+    </section>
+
+    <!-- Team Grid -->
+    <section class="py-20 bg-brand-bg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div id="team-count" class="font-body text-lg text-brand-muted mb-8">// LOADING PARTY...</div>
+            <div id="team-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Skeleton -->
+                <div class="bg-brand-surface border-2 border-brand-border animate-pulse h-72"></div>
+                <div class="bg-brand-surface border-2 border-brand-border animate-pulse h-72"></div>
+                <div class="bg-brand-surface border-2 border-brand-border animate-pulse h-72"></div>
+                <div class="bg-brand-surface border-2 border-brand-border animate-pulse h-72"></div>
+                <div class="bg-brand-surface border-2 border-brand-border animate-pulse h-72"></div>
+                <div class="bg-brand-surface border-2 border-brand-border animate-pulse h-72"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-20 bg-brand-surface border-t-4 border-brand-primary">
+        <div class="max-w-3xl mx-auto px-4 text-center">
+            <h2 class="font-heading text-xl md:text-3xl text-white mb-4">WANT TO JOIN THE PARTY?</h2>
+            <p class="font-body text-xl text-brand-muted mb-10">We're always looking for skilled adventurers to join our guild.</p>
+            <a href="/#careers" class="btn-pixel inline-flex items-center justify-center px-10 py-4 bg-brand-secondary text-black font-heading text-xs border-2 border-black shadow-pixel hover:shadow-pixel-hover hover:-translate-y-1 transition-all">
+                [ ▶ VIEW OPEN QUESTS ]
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black border-t-2 border-brand-border py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="font-heading text-[9px] text-gray-600 tracking-widest">© 2026 JOYSTICK INTERNATIONAL — ALL RIGHTS RESERVED<span class="cursor-blink">_</span></p>
+        </div>
+    </footer>
+
+    <script>
+        let allMembers = [];
+
+        function buildCard(m) {
+            const deptClass = `dept-${m.department || 'OPS'}`;
+            const avatar    = m.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${encodeURIComponent(m.name)}`;
+            const twitter   = m.twitter ? `<a href="https://twitter.com/${m.twitter.replace('@','')}" target="_blank" class="font-body text-lg text-brand-primary hover:underline">${m.twitter}</a>` : '';
+            return `
+            <div class="member-card card-flip cursor-pointer" data-dept="${m.department || 'OPS'}">
+                <div class="card-inner h-full" style="min-height:300px">
+                    <!-- FRONT -->
+                    <div class="card-front absolute inset-0 bg-brand-surface border-2 border-brand-border hover:border-brand-primary transition-colors flex flex-col">
+                        <div class="avatar-wrap relative h-48 bg-black border-b-2 border-brand-border overflow-hidden flex items-center justify-center">
+                            <img src="${avatar}" alt="${m.name}" class="w-32 h-32 object-contain" style="image-rendering:pixelated">
+                            <div class="absolute top-2 right-2 ${deptClass}">${m.department || 'OPS'}</div>
+                            <div class="absolute bottom-2 left-2 bg-black px-2 py-0.5 border border-brand-border">
+                                <span class="font-heading text-[9px] text-brand-muted">SINCE ${m.year || '2018'}</span>
+                            </div>
+                        </div>
+                        <div class="p-5 flex-1 flex flex-col justify-between">
+                            <div>
+                                <h3 class="font-heading text-sm text-white mb-1 leading-snug">${m.name}</h3>
+                                <p class="font-body text-lg text-brand-primary">${m.role}</p>
+                            </div>
+                            <p class="font-body text-sm text-brand-muted mt-3 opacity-60">[ HOVER TO INSPECT ]</p>
+                        </div>
+                    </div>
+                    <!-- BACK -->
+                    <div class="card-back absolute inset-0 bg-brand-surface border-2 border-brand-primary flex flex-col p-6 justify-between">
+                        <div>
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="${deptClass}">${m.department || 'OPS'}</span>
+                                <h3 class="font-heading text-xs text-brand-primary">${m.name}</h3>
+                            </div>
+                            <p class="font-heading text-xs text-brand-tertiary mb-2">${m.role}</p>
+                            <p class="font-body text-lg text-brand-muted leading-relaxed">${m.bio || 'No bio available.'}</p>
+                        </div>
+                        <div class="border-t border-brand-border pt-4 flex items-center justify-between">
+                            <span class="font-heading text-[10px] text-brand-muted">JOINED ${m.year || '??'}</span>
+                            ${twitter}
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function renderTeam(members) {
+            const grid  = document.getElementById('team-grid');
+            const count = document.getElementById('team-count');
+            grid.innerHTML = members.length
+                ? members.map(buildCard).join('')
+                : `<div class="col-span-full text-center font-body text-xl text-brand-muted py-12">// NO MEMBERS IN THIS DEPARTMENT.</div>`;
+            count.textContent = `// ${members.length} PARTY MEMBER${members.length !== 1 ? 'S' : ''} FOUND`;
+        }
+
+        function filterTeam(dept) {
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                b.classList.toggle('active-filter', b.dataset.dept === dept);
+                b.classList.toggle('border-brand-primary', b.dataset.dept === dept);
+                b.classList.toggle('text-brand-primary', b.dataset.dept === dept);
+                b.classList.toggle('border-brand-border', b.dataset.dept !== dept);
+                b.classList.toggle('text-brand-muted', b.dataset.dept !== dept);
+            });
+            const filtered = dept === 'ALL' ? allMembers : allMembers.filter(m => m.department === dept);
+            renderTeam(filtered);
+        }
+
+        async function loadTeam() {
+            try {
+                const res  = await fetch('/api/team');
+                const data = await res.json();
+                allMembers = data.members || [];
+                renderTeam(allMembers);
+            } catch (e) {
+                document.getElementById('team-grid').innerHTML =
+                    `<div class="col-span-full text-center font-body text-xl text-red-400 py-12">// ERROR LOADING PARTY DATA.</div>`;
+            }
+        }
+
+        loadTeam();
+    </script>
+</body>
+</html>
