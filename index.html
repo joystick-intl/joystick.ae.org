@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JoyStick International | We Build Worlds</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link id="heading-font-link" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link id="body-font-link" href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            bg: 'var(--color-bg)',
+                            surface: 'var(--color-surface)',
+                            border: 'var(--color-border)',
+                            primary: 'var(--color-primary)',
+                            secondary: 'var(--color-secondary)',
+                            tertiary: 'var(--color-tertiary)',
+                            text: 'var(--color-text)',
+                            muted: 'var(--color-muted)',
+                        }
+                    },
+                    fontFamily: {
+                        heading: ['var(--font-heading)', 'cursive'],
+                        body: ['var(--font-body)', 'monospace'],
+                    },
+                    spacing: {
+                        base: 'var(--space-base)',
+                    },
+                    boxShadow: {
+                        pixel: 'var(--shadow-pixel)',
+                        'pixel-hover': 'var(--shadow-pixel-hover)',
+                        'pixel-sm': 'var(--shadow-pixel-sm)',
+                        glow: '0 0 10px var(--color-primary)',
+                    },
+                    backgroundImage: {
+                        'pixel-grid': "url('data:image/svg+xml,%3Csvg width=\"40\" height=\"40\" viewBox=\"0 0 40 40\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"%231E1E3F\" fill-opacity=\"0.4\" fill-rule=\"evenodd\"%3E%3Cpath d=\"M0 40L40 0H20L0 20M40 40V20L20 40\"/%3E%3C/g%3E%3C/svg%3E')",
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --color-bg: #0D0D1A;
+            --color-surface: #13132B;
+            --color-border: #1E1E3F;
+            --color-primary: #f6af0b;
+            --color-secondary: #ffffff;
+            --color-tertiary: #ffa200;
+            --color-text: #E0E0FF;
+            --color-muted: #B0B0D0;
+            --font-heading-name: 'Press Start 2P';
+            --font-body-name: 'VT323';
+            --font-heading: 'Press Start 2P', cursive;
+            --font-body: 'VT323', monospace;
+            --space-base: 1rem;
+            --shadow-pixel: 6px 6px 0px 0px #000000;
+            --shadow-pixel-hover: 8px 8px 0px 0px var(--color-secondary);
+            --shadow-pixel-sm: 3px 3px 0px 0px #000000;
+        }
+        body { background-color: var(--color-bg); color: var(--color-text); overflow-x: hidden; image-rendering: pixelated; }
+        .scanlines { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1)); background-size: 100% 4px; pointer-events: none; z-index: 9999; opacity: 0.15; }
+        .crt-flicker { animation: flicker 0.15s infinite; pointer-events: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(18,16,16,0.02); z-index: 9998; }
+        @keyframes flicker { 0% { opacity: 0.9; } 50% { opacity: 1.0; } 100% { opacity: 0.9; } }
+        .cursor-blink { animation: blink 1s step-end infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        ::-webkit-scrollbar { width: 12px; background: var(--color-bg); }
+        ::-webkit-scrollbar-thumb { background: var(--color-border); border: 2px solid var(--color-bg); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--color-primary); }
+        .pixel-border { border: 2px solid var(--color-border); }
+        .pixel-border-primary { border: 2px solid var(--color-primary); }
+        .pixel-border-secondary { border: 2px solid var(--color-secondary); }
+        .btn-pixel { transition: all 0.1s steps(2); }
+        .btn-pixel:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px 0px #000000 !important; }
+        ::selection { background: var(--color-secondary); color: #fff; }
+    </style>
+</head>
+<body class="font-body relative min-h-screen flex flex-col">
+
+    <div class="scanlines"></div>
+    <div class="crt-flicker"></div>
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-brand-bg border-b-4 border-brand-primary w-full">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="/" class="font-heading text-xl md:text-2xl text-white tracking-tighter group">
+                        <span class="text-brand-primary">JOY</span>STICK<span class="cursor-blink ml-1 text-brand-secondary">▮</span>
+                    </a>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="#games"   class="font-heading text-xs text-brand-muted hover:text-brand-secondary transition-colors duration-150 group"><span class="opacity-0 group-hover:opacity-100 mr-1 text-brand-secondary">►</span>GAMES</a>
+                        <a href="#about"   class="font-heading text-xs text-brand-muted hover:text-brand-secondary transition-colors duration-150 group"><span class="opacity-0 group-hover:opacity-100 mr-1 text-brand-secondary">►</span>ABOUT</a>
+                        <a href="/team"    class="font-heading text-xs text-brand-muted hover:text-brand-secondary transition-colors duration-150 group"><span class="opacity-0 group-hover:opacity-100 mr-1 text-brand-secondary">►</span>TEAM</a>
+                        <a href="#careers" class="font-heading text-xs text-brand-muted hover:text-brand-secondary transition-colors duration-150 group"><span class="opacity-0 group-hover:opacity-100 mr-1 text-brand-secondary">►</span>CAREERS</a>
+                        <a href="#contact" class="font-heading text-xs text-brand-muted hover:text-brand-secondary transition-colors duration-150 group"><span class="opacity-0 group-hover:opacity-100 mr-1 text-brand-secondary">►</span>CONTACT</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button type="button" onclick="toggleMobileMenu()" class="text-brand-primary hover:text-white p-2 font-heading text-xs border-2 border-brand-border bg-brand-surface">MENU</button>
+                </div>
+            </div>
+            <!-- Mobile menu -->
+            <div id="mobile-menu" class="hidden md:hidden pb-4">
+                <div class="flex flex-col space-y-3">
+                    <a href="#games"   class="font-heading text-xs text-brand-muted hover:text-brand-secondary px-2 py-1">► GAMES</a>
+                    <a href="#about"   class="font-heading text-xs text-brand-muted hover:text-brand-secondary px-2 py-1">► ABOUT</a>
+                    <a href="/team"    class="font-heading text-xs text-brand-muted hover:text-brand-secondary px-2 py-1">► TEAM</a>
+                    <a href="#careers" class="font-heading text-xs text-brand-muted hover:text-brand-secondary px-2 py-1">► CAREERS</a>
+                    <a href="#contact" class="font-heading text-xs text-brand-muted hover:text-brand-secondary px-2 py-1">► CONTACT</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-brand-bg">
+        <div class="absolute inset-0 opacity-20 bg-pixel-grid"></div>
+        <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center opacity-20 mix-blend-luminosity" style="image-rendering: pixelated;"></div>
+        <div class="relative z-10 text-center px-4 max-w-5xl mx-auto">
+            <h1 class="font-heading text-3xl md:text-5xl lg:text-6xl leading-tight mb-6 text-white drop-shadow-md">
+                WE BUILD WORLDS,<br>
+                <span class="text-brand-primary">ONE PIXEL AT A TIME</span><span class="cursor-blink text-brand-secondary">_</span>
+            </h1>
+            <p class="font-body text-xl md:text-2xl text-brand-muted mb-10 max-w-2xl mx-auto tracking-wide">
+                Indie game studio crafting handcrafted experiences since 2025.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-6">
+                <a href="#games" class="btn-pixel inline-flex items-center justify-center px-8 py-4 bg-brand-secondary text-black font-heading text-xs md:text-sm border-2 border-black shadow-pixel hover:shadow-pixel-hover hover:-translate-y-1 transition-all">
+                    [ ▶ PLAY OUR GAMES ]
+                </a>
+                <a href="#about" class="btn-pixel inline-flex items-center justify-center px-8 py-4 bg-transparent text-brand-primary font-heading text-xs md:text-sm border-2 border-brand-primary hover:bg-brand-primary hover:text-black transition-colors">
+                    [ ◈ OUR STORY ]
+                </a>
+            </div>
+        </div>
+        <div class="absolute bottom-10 right-10 hidden lg:block animate-bounce">
+            <div class="w-16 h-16 bg-brand-tertiary pixel-border shadow-pixel-sm flex items-center justify-center">
+                <span class="font-heading text-2xl text-black">👾</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Bar -->
+    <section class="border-y-2 border-brand-border bg-brand-surface py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div class="space-y-2">
+                    <div class="font-heading text-2xl md:text-3xl text-brand-primary">10+</div>
+                    <div class="font-body text-lg text-brand-muted uppercase tracking-widest">Games Shipped</div>
+                </div>
+                <div class="space-y-2">
+                    <div class="font-heading text-2xl md:text-3xl text-brand-primary">2M+</div>
+                    <div class="font-body text-lg text-brand-muted uppercase tracking-widest">Players</div>
+                </div>
+                <div class="space-y-2">
+                    <div class="font-heading text-2xl md:text-3xl text-brand-primary">5</div>
+                    <div class="font-body text-lg text-brand-muted uppercase tracking-widest">Years</div>
+                </div>
+                <div class="space-y-2">
+                    <div class="font-heading text-2xl md:text-3xl text-brand-primary">∞</div>
+                    <div class="font-body text-lg text-brand-muted uppercase tracking-widest">Passion</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Games -->
+    <section id="games" class="py-20 bg-brand-bg relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-16 border-b-4 border-dotted border-brand-primary pb-4 inline-block">
+                <h2 class="font-heading text-2xl md:text-3xl text-white">// FEATURED TITLES</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                <!-- Game Card 1 -->
+                <div class="group bg-brand-surface border-2 border-brand-border hover:border-brand-secondary transition-all duration-200 hover:-translate-y-2 hover:shadow-pixel-hover flex flex-col h-full">
+                    <div class="h-48 bg-gray-800 relative overflow-hidden border-b-2 border-brand-border">
+                        <img src="https://images.unsplash.com/photo-1552820728-8b83bb6b773f?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=80" alt="Cyber Drifter" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0">
+                        <div class="absolute top-2 right-2 bg-black border border-brand-tertiary px-2 py-1"><span class="font-heading text-[10px] text-brand-tertiary">RPG</span></div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="font-heading text-lg text-brand-tertiary leading-snug">CYBER DRIFTER</h3>
+                            <div class="text-brand-tertiary text-sm tracking-widest">★★★★☆</div>
+                        </div>
+                        <p class="font-body text-xl text-brand-muted mb-6 flex-1">Navigate a collapsing neon city in this turn-based tactical RPG. Hack, slash, and survive.</p>
+                        <button class="w-full py-3 bg-brand-secondary text-black font-heading text-xs border-2 border-black shadow-pixel-sm hover:bg-white transition-colors">[ PLAY NOW ]</button>
+                    </div>
+                </div>
+                <!-- Game Card 2 -->
+                <div class="group bg-brand-surface border-2 border-brand-border hover:border-brand-secondary transition-all duration-200 hover:-translate-y-2 hover:shadow-pixel-hover flex flex-col h-full">
+                    <div class="h-48 bg-gray-800 relative overflow-hidden border-b-2 border-brand-border">
+                        <img src="https://images.unsplash.com/photo-1614713568397-b30b7e656d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=80" alt="Void Walker" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0">
+                        <div class="absolute top-2 right-2 bg-black border border-brand-tertiary px-2 py-1"><span class="font-heading text-[10px] text-brand-tertiary">PLATFORMER</span></div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="font-heading text-lg text-brand-tertiary leading-snug">VOID WALKER</h3>
+                            <div class="text-brand-tertiary text-sm tracking-widest">★★★★★</div>
+                        </div>
+                        <p class="font-body text-xl text-brand-muted mb-6 flex-1">A precision platformer where gravity is optional. Master the void mechanics to escape.</p>
+                        <button class="w-full py-3 bg-brand-secondary text-black font-heading text-xs border-2 border-black shadow-pixel-sm hover:bg-white transition-colors">[ PLAY NOW ]</button>
+                    </div>
+                </div>
+                <!-- Game Card 3 -->
+                <div class="group bg-brand-surface border-2 border-brand-border hover:border-brand-secondary transition-all duration-200 hover:-translate-y-2 hover:shadow-pixel-hover flex flex-col h-full">
+                    <div class="h-48 bg-gray-800 relative overflow-hidden border-b-2 border-brand-border">
+                        <img src="https://images.unsplash.com/photo-1632213702844-1e0615781374?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=80" alt="Dungeon Bit" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0">
+                        <div class="absolute top-2 right-2 bg-black border border-brand-tertiary px-2 py-1"><span class="font-heading text-[10px] text-brand-tertiary">PUZZLE</span></div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="font-heading text-lg text-brand-tertiary leading-snug">DUNGEON BIT</h3>
+                            <div class="text-brand-tertiary text-sm tracking-widest">★★★★☆</div>
+                        </div>
+                        <p class="font-body text-xl text-brand-muted mb-6 flex-1">Solve binary puzzles to unlock ancient doors in this retro-inspired dungeon crawler.</p>
+                        <button class="w-full py-3 bg-brand-secondary text-black font-heading text-xs border-2 border-black shadow-pixel-sm hover:bg-white transition-colors">[ PLAY NOW ]</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 bg-brand-surface border-y-2 border-brand-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row gap-12 items-center">
+                <div class="w-full lg:w-1/2">
+                    <div class="relative aspect-video bg-black border-4 border-brand-border p-2 shadow-pixel">
+                        <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center opacity-60 grayscale hover:grayscale-0 transition-all duration-500"></div>
+                        <div class="absolute bottom-4 left-4 bg-black px-3 py-1 border border-brand-primary">
+                            <span class="font-heading text-[10px] text-brand-primary">HQ_INTERIOR.PNG</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full lg:w-1/2 space-y-6">
+                    <h2 class="font-heading text-2xl md:text-3xl text-white mb-4">ABOUT THE FORGE</h2>
+                    <p class="font-body text-xl text-brand-muted leading-relaxed">We are a collective of retro enthusiasts, code wizards, and pixel artists dedicated to keeping the spirit of the 16-bit era alive.</p>
+                    <p class="font-body text-xl text-brand-muted leading-relaxed">Founded in 2018, JoyStick Studios doesn't just mimic the past; we evolve it. We combine modern game design principles with the crunchy, nostalgic aesthetics of the golden age of gaming.</p>
+                    <div class="pt-4">
+                        <a href="/team" class="btn-pixel inline-flex items-center justify-center px-6 py-3 bg-brand-primary text-black font-heading text-xs border-2 border-black shadow-pixel-sm hover:shadow-pixel hover:-translate-y-1 transition-all">
+                            [ ◈ MEET THE TEAM ]
+                        </a>
+                    </div>
+                    <div class="pt-2">
+                        <h3 class="font-heading text-sm text-brand-tertiary mb-4">TOOLKIT:</h3>
+                        <div class="flex flex-wrap gap-3">
+                            <span class="px-3 py-1 border border-brand-border bg-brand-bg font-body text-lg text-brand-primary hover:border-brand-primary cursor-default">Unity</span>
+                            <span class="px-3 py-1 border border-brand-border bg-brand-bg font-body text-lg text-brand-primary hover:border-brand-primary cursor-default">Godot</span>
+                            <span class="px-3 py-1 border border-brand-border bg-brand-bg font-body text-lg text-brand-primary hover:border-brand-primary cursor-default">Aseprite</span>
+                            <span class="px-3 py-1 border border-brand-border bg-brand-bg font-body text-lg text-brand-primary hover:border-brand-primary cursor-default">FMOD</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Careers / Quest Board — dynamic from API -->
+    <section id="careers" class="py-20 bg-brand-bg relative overflow-hidden">
+        <div class="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')]"></div>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center mb-16">
+                <h2 class="font-heading text-2xl md:text-3xl text-white mb-2">JOIN THE GUILD</h2>
+                <p class="font-body text-xl text-brand-muted">Current Quests Available</p>
+            </div>
+            <div id="jobs-container" class="space-y-6">
+                <!-- Skeleton loaders -->
+                <div class="bg-brand-surface border-2 border-brand-border p-6 animate-pulse"><div class="h-4 bg-brand-border rounded w-1/3 mb-3"></div><div class="h-3 bg-brand-border rounded w-2/3"></div></div>
+                <div class="bg-brand-surface border-2 border-brand-border p-6 animate-pulse"><div class="h-4 bg-brand-border rounded w-1/4 mb-3"></div><div class="h-3 bg-brand-border rounded w-1/2"></div></div>
+                <div class="bg-brand-surface border-2 border-brand-border p-6 animate-pulse"><div class="h-4 bg-brand-border rounded w-2/5 mb-3"></div><div class="h-3 bg-brand-border rounded w-3/4"></div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter -->
+    <section id="contact" class="py-20 bg-brand-surface border-t-4 border-brand-secondary">
+        <div class="max-w-3xl mx-auto px-4 text-center">
+            <h2 class="font-heading text-2xl md:text-4xl text-white mb-4">LEVEL UP YOUR INBOX</h2>
+            <p class="font-body text-xl text-brand-muted mb-10">Get early access, dev logs, and pixel drops.</p>
+            <div id="newsletter-msg" class="hidden mb-6 px-4 py-3 border-2 font-heading text-xs"></div>
+            <div class="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
+                <div class="flex-1 relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-brand-primary font-heading text-xs">></span>
+                    <input id="newsletter-email" type="email" placeholder="ENTER_EMAIL_ADDRESS" class="w-full bg-black border-2 border-brand-border text-brand-primary font-body text-xl py-3 pl-8 pr-4 focus:outline-none focus:border-brand-primary placeholder-gray-700">
+                </div>
+                <button id="newsletter-btn" onclick="subscribeNewsletter()" class="px-8 py-3 bg-brand-secondary text-black font-heading text-xs border-2 border-black shadow-pixel hover:shadow-pixel-hover hover:-translate-y-1 transition-all">
+                    [ SUBSCRIBE ]
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black border-t-2 border-brand-border pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                <div class="col-span-1 md:col-span-1">
+                    <div class="font-heading text-xl text-white mb-4"><span class="text-brand-primary">PIXEL</span>FORGE</div>
+                    <p class="font-body text-lg text-gray-500">Crafting digital nostalgia for the modern age.</p>
+                </div>
+                <div>
+                    <h4 class="font-heading text-xs text-brand-tertiary mb-6">GAMES</h4>
+                    <ul class="space-y-3 font-body text-lg text-brand-muted">
+                        <li><a href="#" class="hover:text-brand-primary hover:underline decoration-2 decoration-brand-primary underline-offset-4">Cyber Drifter</a></li>
+                        <li><a href="#" class="hover:text-brand-primary hover:underline decoration-2 decoration-brand-primary underline-offset-4">Void Walker</a></li>
+                        <li><a href="#" class="hover:text-brand-primary hover:underline decoration-2 decoration-brand-primary underline-offset-4">Dungeon Bit</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-heading text-xs text-brand-tertiary mb-6">COMPANY</h4>
+                    <ul class="space-y-3 font-body text-lg text-brand-muted">
+                        <li><a href="#about"  class="hover:text-brand-primary hover:underline decoration-2 decoration-brand-primary underline-offset-4">About Us</a></li>
+                        <li><a href="/team"   class="hover:text-brand-primary hover:underline decoration-2 decoration-brand-primary underline-offset-4">Team</a></li>
+                        <li><a href="#careers"class="hover:text-brand-primary hover:underline decoration-2 decoration-brand-primary underline-offset-4">Careers</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-heading text-xs text-brand-tertiary mb-6">SOCIAL</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 border-2 border-brand-border flex items-center justify-center text-brand-muted hover:text-brand-secondary hover:border-brand-secondary transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        </a>
+                        <a href="#" class="w-10 h-10 border-2 border-brand-border flex items-center justify-center text-brand-muted hover:text-brand-secondary hover:border-brand-secondary transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-900 pt-8 flex flex-col items-center justify-center text-center">
+                <p class="font-heading text-[9px] text-gray-600 tracking-widest">© 2026 JOYSTICK INTERNATIONAL — ALL RIGHTS RESERVED<span class="cursor-blink">_</span></p>
+                <p class="font-body text-sm text-gray-700 mt-2 flex items-center gap-1">MADE WITH <span class="text-brand-secondary">♥</span> BY JS</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function toggleMobileMenu() {
+            const m = document.getElementById('mobile-menu');
+            m.classList.toggle('hidden');
+        }
+
+        // ── Load Jobs ────────────────────────────────────────────────────────
+        async function loadJobs() {
+            try {
+                const res  = await fetch('/api/jobs');
+                const data = await res.json();
+                const container = document.getElementById('jobs-container');
+                container.innerHTML = '';
+
+                if (!data.jobs || data.jobs.length === 0) {
+                    container.innerHTML = `<div class="text-center font-body text-xl text-brand-muted py-12">// NO ACTIVE QUESTS AT THIS TIME. CHECK BACK SOON.</div>`;
+                    return;
+                }
+
+                data.jobs.forEach(job => {
+                    container.innerHTML += `
+                    <div class="bg-brand-surface border-2 border-brand-border p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 hover:border-brand-tertiary transition-colors group">
+                        <div>
+                            <div class="flex items-center gap-3 mb-2">
+                                <h3 class="font-heading text-sm md:text-base text-white group-hover:text-brand-tertiary">${job.title.toUpperCase()}</h3>
+                                <span class="px-2 py-0.5 bg-brand-bg border border-brand-border text-brand-muted font-heading text-[10px]">${job.department}</span>
+                                <span class="px-2 py-0.5 bg-brand-bg border border-brand-border text-brand-muted font-heading text-[10px]">${job.type || 'FULL-TIME'}</span>
+                            </div>
+                            <p class="font-body text-lg text-brand-muted">${job.description}</p>
+                        </div>
+                        <button onclick="applyJob('${job.title}')" class="flex-shrink-0 px-6 py-3 bg-transparent border-2 border-brand-tertiary text-brand-tertiary font-heading text-xs hover:bg-brand-tertiary hover:text-black transition-colors">
+                            [ ACCEPT QUEST ]
+                        </button>
+                    </div>`;
+                });
+            } catch (e) {
+                document.getElementById('jobs-container').innerHTML =
+                    `<div class="text-center font-body text-xl text-red-400 py-12">// ERROR LOADING QUESTS. PLEASE RELOAD.</div>`;
+            }
+        }
+
+        function applyJob(title) {
+            // Scroll to newsletter with a message
+            document.getElementById('newsletter-email').placeholder = `APPLY_FOR_${title.toUpperCase().replace(/ /g,'_')}`;
+            document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ── Newsletter ───────────────────────────────────────────────────────
+        async function subscribeNewsletter() {
+            const email   = document.getElementById('newsletter-email').value.trim();
+            const msgBox  = document.getElementById('newsletter-msg');
+            const btn     = document.getElementById('newsletter-btn');
+
+            if (!email) { showMsg('ENTER YOUR EMAIL ADDRESS FIRST.', 'error'); return; }
+
+            btn.textContent = '[ LOADING... ]';
+            btn.disabled    = true;
+
+            try {
+                const res  = await fetch('/api/newsletter/subscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    showMsg('✓ SUBSCRIBED! WELCOME TO THE GUILD.', 'success');
+                    document.getElementById('newsletter-email').value = '';
+                } else {
+                    showMsg(`✗ ${(data.error || 'ERROR').toUpperCase()}`, 'error');
+                }
+            } catch (e) {
+                showMsg('✗ NETWORK ERROR. TRY AGAIN.', 'error');
+            } finally {
+                btn.textContent = '[ SUBSCRIBE ]';
+                btn.disabled    = false;
+            }
+        }
+
+        function showMsg(text, type) {
+            const b = document.getElementById('newsletter-msg');
+            b.textContent = text;
+            b.className   = `mb-6 px-4 py-3 border-2 font-heading text-xs ${type === 'success' ? 'border-brand-primary text-brand-primary bg-black' : 'border-red-500 text-red-400 bg-black'}`;
+            b.classList.remove('hidden');
+            setTimeout(() => b.classList.add('hidden'), 5000);
+        }
+
+        // Allow Enter key on email input
+        document.getElementById('newsletter-email').addEventListener('keydown', e => {
+            if (e.key === 'Enter') subscribeNewsletter();
+        });
+
+        loadJobs();
+    </script>
+</body>
+</html>
