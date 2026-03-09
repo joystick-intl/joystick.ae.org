@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | JoyStick International</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { brand: { bg:'var(--color-bg)', surface:'var(--color-surface)', border:'var(--color-border)', primary:'var(--color-primary)', secondary:'var(--color-secondary)', tertiary:'var(--color-tertiary)', text:'var(--color-text)', muted:'var(--color-muted)' } },
+                    fontFamily: { heading:['var(--font-heading)','cursive'], body:['var(--font-body)','monospace'] },
+                    boxShadow: { pixel:'6px 6px 0px 0px #000', 'pixel-sm':'3px 3px 0px 0px #000' }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --color-bg:#0D0D1A; --color-surface:#13132B; --color-border:#1E1E3F;
+            --color-primary:#f6af0b; --color-secondary:#ffffff; --color-tertiary:#ffa200;
+            --color-text:#E0E0FF; --color-muted:#B0B0D0;
+            --font-heading:'Press Start 2P',cursive; --font-body:'VT323',monospace;
+        }
+        body { background:var(--color-bg); color:var(--color-text); font-family:var(--font-body); image-rendering:pixelated; }
+        .scanlines { position:fixed; top:0; left:0; width:100%; height:100%; background:linear-gradient(to bottom,rgba(255,255,255,0),rgba(255,255,255,0) 50%,rgba(0,0,0,0.08) 50%,rgba(0,0,0,0.08)); background-size:100% 4px; pointer-events:none; z-index:9999; opacity:0.1; }
+        .cursor-blink { animation:blink 1s step-end infinite; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+        ::-webkit-scrollbar { width:8px; background:var(--color-bg); }
+        ::-webkit-scrollbar-thumb { background:var(--color-border); }
+        input,textarea,select { background:black !important; border:2px solid var(--color-border); color:var(--color-primary); font-family:var(--font-body); font-size:1.125rem; padding:8px 12px; width:100%; outline:none; transition:border-color 0.15s; }
+        input:focus,textarea:focus,select:focus { border-color:var(--color-primary); }
+        label { font-family:var(--font-heading); font-size:10px; color:var(--color-muted); display:block; margin-bottom:4px; }
+        .tab-btn { font-family:var(--font-heading); font-size:10px; padding:10px 16px; border:2px solid var(--color-border); background:transparent; color:var(--color-muted); cursor:pointer; transition:all 0.1s; }
+        .tab-btn.active { border-color:var(--color-primary); color:var(--color-primary); background:black; }
+        .tab-btn:hover:not(.active) { border-color:var(--color-border); color:var(--color-secondary); }
+        .toast { position:fixed; bottom:24px; right:24px; z-index:9999; font-family:var(--font-heading); font-size:11px; padding:12px 20px; border:2px solid; max-width:320px; opacity:0; transition:opacity 0.3s; pointer-events:none; }
+        .toast.show { opacity:1; }
+        .toast.success { border-color:var(--color-primary); color:var(--color-primary); background:black; }
+        .toast.error   { border-color:#ef4444; color:#ef4444; background:black; }
+        .row-item { border:2px solid var(--color-border); background:var(--color-surface); padding:16px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; transition:border-color 0.15s; }
+        .row-item:hover { border-color:var(--color-tertiary); }
+        .btn { font-family:var(--font-heading); font-size:10px; padding:8px 14px; border:2px solid; cursor:pointer; transition:all 0.1s; background:transparent; }
+        .btn:active { transform:translate(2px,2px); }
+        .btn-primary { border-color:var(--color-primary); color:var(--color-primary); }
+        .btn-primary:hover { background:var(--color-primary); color:black; }
+        .btn-danger  { border-color:#ef4444; color:#ef4444; }
+        .btn-danger:hover  { background:#ef4444; color:white; }
+        .btn-success { border-color:#22c55e; color:#22c55e; }
+        .btn-success:hover { background:#22c55e; color:black; }
+        .badge { font-family:var(--font-heading); font-size:9px; padding:2px 8px; border:1px solid; display:inline-block; }
+        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:1000; display:flex; align-items:center; justify-content:center; padding:16px; }
+        .modal-box { background:var(--color-surface); border:2px solid var(--color-primary); padding:28px; width:100%; max-width:520px; max-height:90vh; overflow-y:auto; }
+        select option { background:#111; }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="scanlines"></div>
+
+    <!-- Login Gate -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center px-4">
+        <div class="w-full max-w-sm">
+            <div class="text-center mb-10">
+                <div class="font-heading text-2xl text-white mb-2"><span class="text-brand-primary">ADMIN</span>.EXE</div>
+                <p class="font-body text-xl text-brand-muted">AUTHENTICATION REQUIRED</p>
+            </div>
+            <div class="bg-brand-surface border-2 border-brand-primary p-8" style="box-shadow:6px 6px 0 #000">
+                <div class="mb-6">
+                    <label>ADMIN KEY</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-brand-primary font-heading text-xs">></span>
+                        <input id="login-key" type="password" placeholder="ENTER_SECRET_KEY" style="padding-left:28px" onkeydown="if(event.key==='Enter') doLogin()">
+                    </div>
+                </div>
+                <button onclick="doLogin()" class="btn btn-primary w-full py-3 text-center" style="width:100%">[ ACCESS ADMIN ]</button>
+                <div id="login-err" class="hidden mt-4 font-heading text-xs text-red-400 text-center"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard (hidden until login) -->
+    <div id="dashboard" class="hidden min-h-screen">
+        <!-- Top Bar -->
+        <header class="sticky top-0 z-50 bg-brand-bg border-b-4 border-brand-primary">
+            <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <a href="/" class="font-heading text-lg text-white"><span class="text-brand-primary">JOY</span>STICK</a>
+                    <span class="font-heading text-[10px] text-brand-border">/</span>
+                    <span class="font-heading text-[10px] text-brand-primary">ADMIN<span class="cursor-blink">_</span></span>
+                </div>
+                <div class="flex items-center gap-6">
+                    <a href="/" target="_blank" class="btn btn-primary text-[10px] px-3 py-1">[ VIEW SITE ]</a>
+                    <button onclick="doLogout()" class="font-heading text-[10px] text-brand-muted hover:text-red-400 transition-colors">LOGOUT ×</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats Row -->
+        <section class="bg-brand-surface border-b-2 border-brand-border">
+            <div class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-3 gap-6 text-center">
+                <div><div id="stat-subscribers" class="font-heading text-2xl text-brand-primary">—</div><div class="font-body text-lg text-brand-muted">SUBSCRIBERS</div></div>
+                <div><div id="stat-team"        class="font-heading text-2xl text-brand-primary">—</div><div class="font-body text-lg text-brand-muted">TEAM MEMBERS</div></div>
+                <div><div id="stat-jobs"        class="font-heading text-2xl text-brand-primary">—</div><div class="font-body text-lg text-brand-muted">ACTIVE JOBS</div></div>
+            </div>
+        </section>
+
+        <!-- Tabs -->
+        <section class="max-w-7xl mx-auto px-4 pt-8">
+            <div class="flex gap-0 mb-8 border-b-2 border-brand-border">
+                <button class="tab-btn active" onclick="switchTab('team')"    id="tab-team">◈ TEAM</button>
+                <button class="tab-btn"        onclick="switchTab('jobs')"    id="tab-jobs">⚔ JOBS</button>
+                <button class="tab-btn"        onclick="switchTab('subs')"    id="tab-subs">✉ NEWSLETTER</button>
+            </div>
+
+            <!-- TEAM TAB -->
+            <div id="pane-team" class="tab-pane pb-20">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="font-heading text-base text-white">// PARTY MEMBERS</h2>
+                    <button onclick="openMemberModal()" class="btn btn-primary">[ + ADD MEMBER ]</button>
+                </div>
+                <div id="team-list" class="space-y-3"></div>
+            </div>
+
+            <!-- JOBS TAB -->
+            <div id="pane-jobs" class="tab-pane hidden pb-20">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="font-heading text-base text-white">// QUEST BOARD</h2>
+                    <button onclick="openJobModal()" class="btn btn-primary">[ + ADD QUEST ]</button>
+                </div>
+                <div id="jobs-list" class="space-y-3"></div>
+            </div>
+
+            <!-- NEWSLETTER TAB -->
+            <div id="pane-subs" class="tab-pane hidden pb-20">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="font-heading text-base text-white">// SUBSCRIBER LOG</h2>
+                    <button onclick="exportCSV()" class="btn btn-success">[ ↓ EXPORT CSV ]</button>
+                </div>
+                <div class="bg-brand-surface border-2 border-brand-border overflow-x-auto">
+                    <table class="w-full font-body text-lg">
+                        <thead>
+                            <tr class="border-b-2 border-brand-border bg-black">
+                                <th class="px-4 py-3 text-left font-heading text-[10px] text-brand-muted">#</th>
+                                <th class="px-4 py-3 text-left font-heading text-[10px] text-brand-muted">EMAIL</th>
+                                <th class="px-4 py-3 text-left font-heading text-[10px] text-brand-muted">DATE</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subs-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Member Modal -->
+    <div id="member-modal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <h3 class="font-heading text-sm text-brand-primary mb-6" id="member-modal-title">ADD MEMBER</h3>
+            <input type="hidden" id="m-id">
+            <div class="space-y-4">
+                <div><label>NAME *</label><input id="m-name" placeholder="Alex Reyes"></div>
+                <div><label>ROLE *</label><input id="m-role" placeholder="Art Director"></div>
+                <div>
+                    <label>DEPARTMENT *</label>
+                    <select id="m-dept">
+                        <option value="ART">ART</option>
+                        <option value="CODE">CODE</option>
+                        <option value="AUDIO">AUDIO</option>
+                        <option value="DESIGN">DESIGN</option>
+                        <option value="OPS">OPS</option>
+                    </select>
+                </div>
+                <div><label>BIO</label><textarea id="m-bio" rows="3" placeholder="Short bio..."></textarea></div>
+                <div><label>AVATAR URL</label><input id="m-avatar" placeholder="https://... (leave blank for auto-generated)"></div>
+                <div><label>TWITTER HANDLE</label><input id="m-twitter" placeholder="@handle"></div>
+                <div><label>YEAR JOINED</label><input id="m-year" placeholder="2024"></div>
+            </div>
+            <div class="flex gap-3 mt-8">
+                <button onclick="saveMember()" class="btn btn-primary flex-1 py-3">[ SAVE ]</button>
+                <button onclick="closeModal('member-modal')" class="btn btn-danger py-3 px-6">[ CANCEL ]</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Job Modal -->
+    <div id="job-modal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <h3 class="font-heading text-sm text-brand-primary mb-6" id="job-modal-title">ADD QUEST</h3>
+            <input type="hidden" id="j-id">
+            <div class="space-y-4">
+                <div><label>TITLE *</label><input id="j-title" placeholder="Senior Pixel Artist"></div>
+                <div>
+                    <label>DEPARTMENT *</label>
+                    <select id="j-dept">
+                        <option value="ART">ART</option>
+                        <option value="CODE">CODE</option>
+                        <option value="AUDIO">AUDIO</option>
+                        <option value="DESIGN">DESIGN</option>
+                        <option value="OPS">OPS</option>
+                    </select>
+                </div>
+                <div>
+                    <label>TYPE</label>
+                    <select id="j-type">
+                        <option value="Full-Time">FULL-TIME</option>
+                        <option value="Part-Time">PART-TIME</option>
+                        <option value="Contract">CONTRACT</option>
+                        <option value="Internship">INTERNSHIP</option>
+                    </select>
+                </div>
+                <div><label>DESCRIPTION *</label><textarea id="j-desc" rows="3" placeholder="Job description..."></textarea></div>
+                <div><label>REQUIREMENTS (one per line)</label><textarea id="j-reqs" rows="4" placeholder="3+ years experience&#10;Strong portfolio&#10;..."></textarea></div>
+                <div>
+                    <label>STATUS</label>
+                    <select id="j-active">
+                        <option value="1">ACTIVE</option>
+                        <option value="0">INACTIVE</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-8">
+                <button onclick="saveJob()" class="btn btn-primary flex-1 py-3">[ SAVE ]</button>
+                <button onclick="closeModal('job-modal')" class="btn btn-danger py-3 px-6">[ CANCEL ]</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        let ADMIN_KEY   = '';
+        let teamData    = [];
+        let jobsData    = [];
+        let subsData    = [];
+
+        // ── Auth ──────────────────────────────────────────────────────────────
+        function doLogin() {
+            const key = document.getElementById('login-key').value.trim();
+            if (!key) { showLoginErr('ENTER YOUR ADMIN KEY.'); return; }
+            ADMIN_KEY = key;
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            loadAll();
+        }
+
+        function doLogout() {
+            ADMIN_KEY = '';
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('login-key').value = '';
+        }
+
+        function showLoginErr(msg) {
+            const e = document.getElementById('login-err');
+            e.textContent = msg;
+            e.classList.remove('hidden');
+        }
+
+        document.getElementById('login-key').addEventListener('keydown', e => {
+            if (e.key === 'Enter') doLogin();
+        });
+
+        // ── Tabs ──────────────────────────────────────────────────────────────
+        function switchTab(tab) {
+            ['team','jobs','subs'].forEach(t => {
+                document.getElementById(`pane-${t}`).classList.toggle('hidden', t !== tab);
+                document.getElementById(`tab-${t}`).classList.toggle('active', t === tab);
+            });
+        }
+
+        // ── Load All ──────────────────────────────────────────────────────────
+        async function loadAll() {
+            await Promise.all([loadTeam(), loadJobs(), loadSubs()]);
+        }
+
+        // ── Team ─────────────────────────────────────────────────────────────
+        async function loadTeam() {
+            try {
+                const res  = await fetch('/api/team', { headers: { 'x-admin-key': ADMIN_KEY } });
+                const data = await res.json();
+                if (res.status === 401) { doLogout(); return; }
+                teamData = data.members || [];
+                document.getElementById('stat-team').textContent = teamData.length;
+                renderTeam();
+            } catch(e) { toast('ERROR LOADING TEAM', 'error'); }
+        }
+
+        function renderTeam() {
+            const el = document.getElementById('team-list');
+            el.innerHTML = teamData.length ? teamData.map(m => `
+                <div class="row-item">
+                    <div class="flex items-center gap-4">
+                        <img src="${m.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${encodeURIComponent(m.name)}`}" class="w-10 h-10 border border-brand-border" style="image-rendering:pixelated">
+                        <div>
+                            <div class="font-heading text-xs text-white">${m.name}</div>
+                            <div class="font-body text-lg text-brand-muted">${m.role}</div>
+                        </div>
+                        <span class="badge" style="color:var(--color-tertiary);border-color:var(--color-tertiary)">${m.department}</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="editMember(${m.id})" class="btn btn-primary">[ EDIT ]</button>
+                        <button onclick="deleteMember(${m.id},'${m.name.replace(/'/g,"\\'")}');" class="btn btn-danger">[ DEL ]</button>
+                    </div>
+                </div>`).join('') : '<div class="font-body text-xl text-brand-muted py-8 text-center">// NO MEMBERS YET.</div>';
+        }
+
+        function openMemberModal(data) {
+            document.getElementById('member-modal-title').textContent = data ? 'EDIT MEMBER' : 'ADD MEMBER';
+            document.getElementById('m-id').value      = data?.id     || '';
+            document.getElementById('m-name').value    = data?.name   || '';
+            document.getElementById('m-role').value    = data?.role   || '';
+            document.getElementById('m-dept').value    = data?.department || 'ART';
+            document.getElementById('m-bio').value     = data?.bio    || '';
+            document.getElementById('m-avatar').value  = data?.avatar || '';
+            document.getElementById('m-twitter').value = data?.twitter|| '';
+            document.getElementById('m-year').value    = data?.year   || new Date().getFullYear();
+            document.getElementById('member-modal').classList.remove('hidden');
+        }
+
+        function editMember(id) {
+            const m = teamData.find(x => String(x.id) === String(id));
+            if (m) openMemberModal(m);
+        }
+
+        async function saveMember() {
+            const id   = document.getElementById('m-id').value;
+            const body = {
+                name: document.getElementById('m-name').value.trim(),
+                role: document.getElementById('m-role').value.trim(),
+                department: document.getElementById('m-dept').value,
+                bio:    document.getElementById('m-bio').value.trim(),
+                avatar: document.getElementById('m-avatar').value.trim(),
+                twitter:document.getElementById('m-twitter').value.trim(),
+                year:   document.getElementById('m-year').value.trim(),
+            };
+            if (!body.name || !body.role) { toast('NAME AND ROLE ARE REQUIRED', 'error'); return; }
+            if (id) body.id = id;
+            const method = id ? 'PUT' : 'POST';
+            const res = await fetch('/api/team', { method, headers: { 'Content-Type':'application/json','x-admin-key': ADMIN_KEY }, body: JSON.stringify(body) });
+            const data = await res.json();
+            if (res.ok) {
+                toast(id ? 'MEMBER UPDATED ✓' : 'MEMBER ADDED ✓', 'success');
+                closeModal('member-modal');
+                loadTeam();
+            } else { toast(data.error?.toUpperCase() || 'ERROR', 'error'); }
+        }
+
+        async function deleteMember(id, name) {
+            if (!confirm(`DELETE ${name}? THIS CANNOT BE UNDONE.`)) return;
+            const res = await fetch('/api/team', { method:'DELETE', headers:{'Content-Type':'application/json','x-admin-key':ADMIN_KEY}, body: JSON.stringify({id}) });
+            if (res.ok) { toast('MEMBER REMOVED', 'success'); loadTeam(); }
+            else toast('DELETE FAILED', 'error');
+        }
+
+        // ── Jobs ─────────────────────────────────────────────────────────────
+        async function loadJobs() {
+            try {
+                const res  = await fetch('/api/jobs', { headers:{'x-admin-key': ADMIN_KEY} });
+                const data = await res.json();
+                jobsData   = data.jobs || [];
+                document.getElementById('stat-jobs').textContent = jobsData.filter(j => j.active === '1').length;
+                renderJobs();
+            } catch(e) { toast('ERROR LOADING JOBS','error'); }
+        }
+
+        function renderJobs() {
+            const el = document.getElementById('jobs-list');
+            el.innerHTML = jobsData.length ? jobsData.map(j => `
+                <div class="row-item">
+                    <div>
+                        <div class="flex items-center gap-3 mb-1">
+                            <span class="font-heading text-xs text-white">${j.title}</span>
+                            <span class="badge" style="color:var(--color-tertiary);border-color:var(--color-tertiary)">${j.department}</span>
+                            <span class="badge" style="color:${j.active==='1'?'#22c55e':'#6b7280'};border-color:${j.active==='1'?'#22c55e':'#6b7280'}">${j.active==='1'?'ACTIVE':'INACTIVE'}</span>
+                        </div>
+                        <div class="font-body text-lg text-brand-muted">${j.type || 'Full-Time'}</div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="toggleJob('${j.id}','${j.active}')" class="btn ${j.active==='1'?'btn-danger':'btn-success'}">${j.active==='1'?'[ DEACTIVATE ]':'[ ACTIVATE ]'}</button>
+                        <button onclick="editJob('${j.id}')" class="btn btn-primary">[ EDIT ]</button>
+                        <button onclick="deleteJob('${j.id}','${j.title.replace(/'/g,"\\'")}');" class="btn btn-danger">[ DEL ]</button>
+                    </div>
+                </div>`).join('') : '<div class="font-body text-xl text-brand-muted py-8 text-center">// NO JOBS POSTED YET.</div>';
+        }
+
+        function openJobModal(data) {
+            document.getElementById('job-modal-title').textContent = data ? 'EDIT QUEST' : 'ADD QUEST';
+            document.getElementById('j-id').value    = data?.id   || '';
+            document.getElementById('j-title').value = data?.title|| '';
+            document.getElementById('j-dept').value  = data?.department||'ART';
+            document.getElementById('j-type').value  = data?.type || 'Full-Time';
+            document.getElementById('j-desc').value  = data?.description||'';
+            document.getElementById('j-reqs').value  = data?.requirements||'';
+            document.getElementById('j-active').value= data?.active||'1';
+            document.getElementById('job-modal').classList.remove('hidden');
+        }
+
+        function editJob(id) {
+            const j = jobsData.find(x => String(x.id) === String(id));
+            if (j) openJobModal(j);
+        }
+
+        async function saveJob() {
+            const id   = document.getElementById('j-id').value;
+            const body = {
+                title:       document.getElementById('j-title').value.trim(),
+                department:  document.getElementById('j-dept').value,
+                type:        document.getElementById('j-type').value,
+                description: document.getElementById('j-desc').value.trim(),
+                requirements:document.getElementById('j-reqs').value.trim(),
+                active:      document.getElementById('j-active').value,
+            };
+            if (!body.title || !body.description) { toast('TITLE AND DESCRIPTION ARE REQUIRED','error'); return; }
+            if (id) body.id = id;
+            const method = id ? 'PUT' : 'POST';
+            const res  = await fetch('/api/jobs', { method, headers:{'Content-Type':'application/json','x-admin-key':ADMIN_KEY}, body:JSON.stringify(body) });
+            const data = await res.json();
+            if (res.ok) {
+                toast(id ? 'JOB UPDATED ✓' : 'JOB ADDED ✓','success');
+                closeModal('job-modal');
+                loadJobs();
+            } else toast(data.error?.toUpperCase()||'ERROR','error');
+        }
+
+        async function toggleJob(id, current) {
+            const res = await fetch('/api/jobs',{method:'PUT',headers:{'Content-Type':'application/json','x-admin-key':ADMIN_KEY},body:JSON.stringify({id,active:current==='1'?'0':'1'})});
+            if (res.ok) { toast('STATUS UPDATED','success'); loadJobs(); }
+        }
+
+        async function deleteJob(id, title) {
+            if (!confirm(`DELETE QUEST "${title}"?`)) return;
+            const res = await fetch('/api/jobs',{method:'DELETE',headers:{'Content-Type':'application/json','x-admin-key':ADMIN_KEY},body:JSON.stringify({id})});
+            if (res.ok) { toast('JOB DELETED','success'); loadJobs(); }
+        }
+
+        // ── Newsletter ────────────────────────────────────────────────────────
+        async function loadSubs() {
+            try {
+                const res  = await fetch('/api/newsletter/list',{headers:{'x-admin-key':ADMIN_KEY}});
+                const data = await res.json();
+                if (res.status===401) { document.getElementById('subs-tbody').innerHTML='<tr><td colspan="3" class="px-4 py-6 text-red-400 font-body text-lg">UNAUTHORIZED</td></tr>'; return; }
+                subsData = data.log || [];
+                document.getElementById('stat-subscribers').textContent = data.count || 0;
+                const tbody = document.getElementById('subs-tbody');
+                tbody.innerHTML = subsData.length
+                    ? subsData.map((s,i)=>`<tr class="border-b border-brand-border hover:bg-black transition-colors"><td class="px-4 py-3 text-brand-muted">${i+1}</td><td class="px-4 py-3 text-brand-primary">${s.email}</td><td class="px-4 py-3 text-brand-muted">${new Date(s.subscribedAt).toLocaleDateString()}</td></tr>`).join('')
+                    : '<tr><td colspan="3" class="px-4 py-8 text-brand-muted font-body text-xl text-center">// NO SUBSCRIBERS YET.</td></tr>';
+            } catch(e) { toast('ERROR LOADING SUBSCRIBERS','error'); }
+        }
+
+        function exportCSV() {
+            if (!subsData.length) { toast('NO SUBSCRIBERS TO EXPORT','error'); return; }
+            const csv  = ['Email,Date'].concat(subsData.map(s=>`${s.email},${s.subscribedAt}`)).join('\n');
+            const blob = new Blob([csv],{type:'text/csv'});
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement('a');
+            a.href = url; a.download='joystick_subscribers.csv'; a.click();
+            URL.revokeObjectURL(url);
+            toast('CSV EXPORTED ✓','success');
+        }
+
+        // ── Helpers ───────────────────────────────────────────────────────────
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        // Close modals on backdrop click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.add('hidden'); });
+        });
+
+        function toast(msg, type='success') {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className   = `toast ${type} show`;
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+    </script>
+</body>
+</html>
